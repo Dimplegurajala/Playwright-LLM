@@ -1,5 +1,5 @@
 from pages.base_page import BasePage
-from playwright.sync_api import sync_palywright, expect
+from playwright.sync_api import sync_playwright, expect
 
 class ContactListPage(BasePage):
     ADD_CONTACT_BTN = "#add-contact"
