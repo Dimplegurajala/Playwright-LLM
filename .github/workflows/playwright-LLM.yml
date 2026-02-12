@@ -31,16 +31,16 @@ jobs:
         run: |
           pip install playwright==1.41.2
           playwright install chromium
-          sudo playwright install-deps
+          sudo npx playwright install-deps
 
       - name: Create Artifact Directories
         run: mkdir -p outputs data logs
 
       - name: Start Mock API Server
         run: |
-          # Ensure port matches your mock_api.py (5001)
+          # Ensure port matches your mock_api.py (5000)
           python utils/mock_api.py &
-          timeout 30s bash -c 'until curl -s http://127.0.0.1:5001/mock/contact; do sleep 2; done'
+          timeout 30s bash -c 'until curl -s http://127.0.0.1:5000/mock/contact; do sleep 2; done'
 
       - name: Execute Agentic Playwright Suite
         env:
