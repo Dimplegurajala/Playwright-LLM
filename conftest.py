@@ -14,13 +14,16 @@ def logger():
 def page(logger):
     with sync_playwright() as p:
         is_ci = os.getenv("CI", "false").lower() == "true"
+        if not os.path.exists("outputs"):
+            os.makedirs("outputs")
     
         browser = p.chromium.launch(headless=is_ci)
         context = browser.new_context()
         context.tracing.start(screenshots=True, snapshots=True, sources= True)
         page= context.new_page()
         yield page
-        trace_path = f"Outputs/trace_{os.getenv('PYTEST_CURRENT_TEST').split(' ')[0]}.zip"
+        test_name = os.getenv('PYTEST_CURRENT_TEST', 'test').split(' ')[0].replace("::", "_")
+        trace_path = f"outputs/trace_{test_name}.zip"
         context.tracing.stop(path=trace_path)
         browser.close()
     

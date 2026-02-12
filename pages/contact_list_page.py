@@ -8,5 +8,6 @@ class ContactListPage(BasePage):
         self.click(self.ADD_CONTACT_BTN)
 
     def verify_contact_present(self, email):
+        self.page.wait_for_load_state("networkidle")
         row = self.page.locator("tr", has_text=email)
         expect(row).to_be_visible(timeout=5000)

@@ -29,4 +29,6 @@ class AddContactPage(BasePage):
 
     def save_contact(self):
         # AI Healing is active here via BasePage click()
-        self.click(self.SUBMIT_BTN)
+        self.page.click("#submit")
+         # Wait for the URL to change back to the dashboard
+        self.page.wait_for_url("**/contactList")

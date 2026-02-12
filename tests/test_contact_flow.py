@@ -1,5 +1,6 @@
 
 import pytest
+import time
 from pages.login_page import LoginPage
 from pages.contact_list_page import ContactListPage
 from pages.add_contact_page import AddContactPage
@@ -21,6 +22,10 @@ from pages.add_contact_page import AddContactPage
     }
 ])
 def test_e2e_add_contact_full_form(page, healer, logger, contact_data):
+    #prevent duplicate 
+    timestamp = int(time.time())
+    unique_email = f"dimple.{timestamp}@celcom.com"
+    contact_data["email"] = unique_email
     # 1. Login
     login = LoginPage(page, healer, logger)
     login.navigate()
@@ -35,5 +40,6 @@ def test_e2e_add_contact_full_form(page, healer, logger, contact_data):
     form.fill_contact_details(contact_data)
     form.save_contact()
     
+    page.wait_for_load_state("networkidle")
     # 4. Data Integrity Verification
     dashboard.verify_contact_present(contact_data["email"])
