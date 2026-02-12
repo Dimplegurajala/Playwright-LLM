@@ -25,28 +25,28 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+
       - name: Install Playwright Browsers & OS Dependencies
+        # Use 'playwright' directly to avoid Python path mismatch errors
         run: |
           pip install playwright==1.41.2
-          python -m playwright install chromium
-          sudo python -m playwright install-deps
+          playwright install chromium
+          sudo playwright install-deps
 
       - name: Create Artifact Directories
         run: mkdir -p outputs data logs
 
       - name: Start Mock API Server
-        # Background process for hermetic contract testing
         run: |
+          # Ensure port matches your mock_api.py (5001)
           python utils/mock_api.py &
-          # Master's Level: Dynamic wait for the Mock API to be healthy
-          timeout 30s bash -c 'until curl -s http://127.0.0.1:5000/mock/contact; do sleep 2; done'
+          timeout 30s bash -c 'until curl -s http://127.0.0.1:5001/mock/contact; do sleep 2; done'
 
       - name: Execute Agentic Playwright Suite
         env:
           PYTHONPATH: .
-          CI: "true" # Triggers headless logic in conftest.py
+          CI: "true" 
         run: |
-          # Running the core contact flow and api resilience tests
           pytest tests/test_contact_flow.py tests/test_api.py -v
 
       - name: Execute Locust Performance Test
