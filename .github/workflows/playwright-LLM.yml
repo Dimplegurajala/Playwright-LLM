@@ -1,0 +1,26 @@
+name: Agentic QA Pipeline
+on: [push]
+
+jobs:
+  automation-suite:
+    runs-on: self-hosted # EC2 Runner
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Environment
+        run: |
+          pip install -r requirements.txt
+          playwright install --with-deps
+      
+      - name: Run Must-Have Tests
+        env:
+          PYTHONPATH: .
+          CI: "true"
+        run: |
+          python utils/mock_api.py & 
+          pytest -m must_have 
+          
+      - name: Provision Artifacts to AWS S3
+        if: always()
+        run: |
+          # Uploading reports and Traces to S3 for Audit Trail
+          aws s3 cp outputs/ s3://celcom-qa-audit-trail/$(date +%Y-%m-%d)/ --recursive
