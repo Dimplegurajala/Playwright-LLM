@@ -13,7 +13,9 @@ def logger():
 @pytest.fixture(scope="function")
 def page(logger):
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=os.getenv("CI") == True)
+        is_ci = os.getenv("CI", "false").lower() == "true"
+    
+        browser = p.chromium.launch(headless=is_ci)
         context = browser.new_context()
         context.tracing.start(screenshots=True, snapshots=True, sources= True)
         page= context.new_page()
