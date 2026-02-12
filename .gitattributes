@@ -1,0 +1,4 @@
+# Force GitHub to ignore these folders for language statistics
+outputs/** linguist-vendored
+data/** linguist-vendored
+logs/** linguist-vendored
