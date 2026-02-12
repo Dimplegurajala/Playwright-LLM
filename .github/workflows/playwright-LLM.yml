@@ -1,27 +1,65 @@
-name: Agentic QA Pipeline
-on: [push]
+name: Playwright-LLM
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
 
 jobs:
   automation-suite:
-    runs-on: ubuntu-latest #self-hosted # for EC2 Runner
+    runs-on: ubuntu-latest
+    
     steps:
-      - uses: actions/checkout@v4
-      - name: Setup Environment
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt --no-cache-dir
-          playwright install --with-deps
-      
-      - name: Run Must-Have Tests
+          pip install -r requirements.txt
+          pip install playwright
+          playwright install --with-deps chromium
+
+      - name: Create Artifact Directories
+        run: mkdir -p outputs data logs
+
+      - name: Start Mock API Server
+        # Background process for hermetic contract testing
+        run: |
+          python utils/mock_api.py &
+          # Master's Level: Dynamic wait for the Mock API to be healthy
+          timeout 30s bash -c 'until curl -s http://127.0.0.1:5000/mock/contact; do sleep 2; done'
+
+      - name: Execute Agentic Playwright Suite
         env:
           PYTHONPATH: .
-          CI: "true"
+          CI: "true" # Triggers headless logic in conftest.py
         run: |
-          python utils/mock_api.py & 
-          pytest -m must_have 
-          
-      - name: Provision Artifacts to AWS S3
+          # Running the core contact flow and api resilience tests
+          pytest tests/test_contact_flow.py tests/test_api.py -v
+
+      - name: Execute Locust Performance Test
+        run: |
+          locust -f performance/locust_file.py \
+          --headless \
+          -u 10 -r 2 -t 30s \
+          --host https://thinking-tester-contact-list.herokuapp.com \
+          --only-summary
+
+      - name: Archive Traces & Audit Artifacts
         if: always()
-        run: |
-          # Uploading Traces to S3 for Audit Trail
-          aws s3 cp outputs/ s3://celcom-qa-audit-trail/$(date +%Y-%m-%d)/ --recursive --exclude "*" --include "*.zip"
+        uses: actions/upload-artifact@v4
+        with:
+          name: celcom-qa-audit-trail
+          path: |
+            outputs/
+            data/
+            logs/

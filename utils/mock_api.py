@@ -42,4 +42,4 @@ def mock_contact():
     return jsonify(data)
 
 if __name__ == "__main__":
-    app.run(port=5001) # Using 5001 to avoid common macOS/Windows conflicts
+    app.run(port=5000) # Using 5000 to avoid common macOS/Windows conflicts
