@@ -3,7 +3,7 @@ on: [push]
 
 jobs:
   automation-suite:
-    runs-on: self-hosted # EC2 Runner
+    runs-on: ubuntu-latest #self-hosted # for EC2 Runner
     steps:
       - uses: actions/checkout@v4
       - name: Setup Environment
@@ -22,5 +22,5 @@ jobs:
       - name: Provision Artifacts to AWS S3
         if: always()
         run: |
-          # Uploading reports and Traces to S3 for Audit Trail
-          aws s3 cp outputs/ s3://celcom-qa-audit-trail/$(date +%Y-%m-%d)/ --recursive
+          # Uploading Traces to S3 for Audit Trail
+          aws s3 cp outputs/ s3://celcom-qa-audit-trail/$(date +%Y-%m-%d)/ --recursive --exclude "*" --include "*.zip"
