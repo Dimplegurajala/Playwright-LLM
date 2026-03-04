@@ -1,0 +1,39 @@
+# --- Python Hygiene ---
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.venv/
+venv/
+env/
+
+# --- Playwright & Test Artifacts ---
+# We keep the folder structure but ignore the actual heavy files
+outputs/*.zip
+outputs/*.html
+outputs/*.png
+outputs/*.json
+!outputs/.gitkeep
+
+# --- AI & Model Data ---
+# If you download models locally, don't push them
+.ollama/
+models/*.bin
+models/*.gguf
+
+# --- Data & Logs ---
+# Ignore the scraped results and performance logs
+outputs/scraped_contacts.csv
+outputs/audit_scraped_data.csv
+*.log
+locust.log
+
+# --- Environment & Security ---
+# Crucial: Never push your AWS keys or login credentials
+.env
+.flaskenv
+auth.json
+
+# --- OS Specific ---
+.DS_Store
+Thumbs.db
